@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Ransomware Security Lab</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <header>
+        <h1>Ransomware Security Lab</h1>
+        <p>Controlled Malware Behavior Simulation</p>
+
+        <div class="status-badge">
+            LAB READY
+        </div>
+    </header>
+
+
+    <!-- SYSTEM INFORMATION -->
+    <section class="cards">
+
+        <div class="card">
+            <h3>ATTACKER</h3>
+            <strong>LAB CONTROLLER</strong>
+            <p>Web Interface</p>
+        </div>
+
+        <div class="card">
+            <h3>VICTIM</h3>
+            <strong>locker-victim</strong>
+            <p>Docker Container</p>
+        </div>
+
+        <div class="card">
+            <h3>NETWORK</h3>
+            <strong>cyber-lab</strong>
+            <p>172.19.0.0/16</p>
+        </div>
+
+        <div class="card">
+            <h3>SECURITY</h3>
+            <strong>ISOLATED</strong>
+            <p>Training Environment</p>
+        </div>
+
+    </section>
+
+
+    <!-- ATTACK SIMULATION -->
+    <section class="panel">
+
+        <h2>Attack Simulation</h2>
+
+        <p class="description">
+            Execute a controlled ransomware demonstration against
+            the isolated Docker victim.
+        </p>
+
+
+        <div class="buttons">
+
+            <button class="btn recon" onclick="discoverHosts()">
+    Scan Lab Network
+</button>
+
+            <button class="btn connection" onclick="checkStatus()">
+                Check Connection
+            </button>
+
+            <button class="btn attack" onclick="initiateAttack()">
+                Initiate Attack
+            </button>
+
+            <button class="btn encrypt" onclick="encryptFiles()">
+                Encrypt Files
+            </button>
+
+            <button class="btn lock" onclick="lockVictim()">
+                Lock Victim
+            </button>
+
+            <button class="btn recovery" onclick="recoverFiles()">
+                Recovery
+            </button>
+<button class="btn reset" onclick="resetLab()">
+    Reset Lab
+</button>
+
+        </div>
+<div class="recon-panel">
+
+    <h3>Network Reconnaissance</h3>
+
+    <p id="reconStatus">
+        Click "Scan Lab Network" to discover available hosts.
+    </p>
+
+    <div id="hostList"></div>
+
+    <div id="hostScanControls" style="display:none;">
+
+        <label for="hostSelect">
+            Select Host
+        </label>
+
+        <select id="hostSelect">
+        </select>
+
+        <button class="btn recon" onclick="scanSelectedHost()">
+            Scan Selected Host
+        </button>
+
+    </div>
+
+    <div id="serviceResults"></div>
+
+</div>
+    </section>
+
+
+    <!-- ATTACK TIMELINE -->
+    <section class="panel">
+
+        <h2>Attack Timeline</h2>
+
+        <div class="timeline">
+
+            <div class="timeline-item">
+                <span>01</span>
+                <div>
+                    <strong>Reconnaissance</strong>
+                    <p id="stage1">Waiting...</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <span>02</span>
+                <div>
+                    <strong>Victim Connection</strong>
+                    <p id="stage2">Waiting...</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <span>03</span>
+                <div>
+                    <strong>Attack Simulation</strong>
+                    <p id="stage3">Waiting...</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <span>04</span>
+                <div>
+                    <strong>File Encryption</strong>
+                    <p id="stage4">Waiting...</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <span>05</span>
+                <div>
+                    <strong>Victim Lock</strong>
+                    <p id="stage5">Waiting...</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <span>06</span>
+                <div>
+                    <strong>Recovery</strong>
+                    <p id="stage6">Waiting...</p>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- LIVE LOG -->
+    <section class="panel">
+
+        <h2>Live Activity Log</h2>
+
+        <div class="terminal">
+
+            <p>[SYSTEM] Ransomware Security Lab initialized.</p>
+            <p>[SYSTEM] Docker victim: locker-victim</p>
+            <p>[SYSTEM] Network: cyber-lab</p>
+            <p>[SYSTEM] Waiting for operator...</p>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<script>
+async function resetLab() {
+
+    addLog("[RESET] Resetting laboratory...");
+
+    const response = await fetch("/api/reset");
+    const data = await response.json();
+
+    if (data.success) {
+
+        addLog("[RESET] Lab reset successfully.");
+
+        addLog("[RESET] Demo files recreated:");
+
+        data.files.forEach(file => {
+            addLog("[RESET] " + file);
+        });
+
+        document.getElementById("stage1").innerText = "Waiting...";
+        document.getElementById("stage2").innerText = "Waiting...";
+        document.getElementById("stage3").innerText = "Waiting...";
+        document.getElementById("stage4").innerText = "Waiting...";
+        document.getElementById("stage5").innerText = "Waiting...";
+        document.getElementById("stage6").innerText = "Waiting...";
+
+    } else {
+
+        addLog("[ERROR] Reset failed: " + data.error);
+
+    }
+}
+
+async function addLog(message) {
+
+    const log = document.querySelector(".terminal");
+
+    const p = document.createElement("p");
+
+    p.textContent = message;
+
+    log.appendChild(p);
+
+    log.scrollTop = log.scrollHeight;
+}
+
+
+/* CHECK CONNECTION */
+
+async function checkStatus() {
+
+    await addLog("[SYSTEM] Checking victim connection...");
+
+    try {
+
+        const response = await fetch("/api/status");
+
+        if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+
+            await addLog("[STATUS] Victim: " + data.container);
+
+            await addLog(
+                "[STATUS] Container state: " + data.status
+            );
+
+            await addLog(
+                "[STATUS] Container ID: " + data.id
+            );
+
+            document.getElementById("stage2").textContent =
+                "Connection verified";
+
+        } else {
+
+            await addLog("[ERROR] " + data.error);
+
+        }
+
+    } catch (error) {
+
+        await addLog("[ERROR] " + error.message);
+
+    }
+}
+
+async function discoverHosts() {
+
+    const status = document.getElementById("reconStatus");
+    const hostList = document.getElementById("hostList");
+    const controls = document.getElementById("hostScanControls");
+    const select = document.getElementById("hostSelect");
+
+    status.innerText = "Scanning lab network with Nmap...";
+    hostList.innerHTML = "";
+    controls.style.display = "none";
+
+    try {
+
+        const response = await fetch("/api/recon/hosts");
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error(data.error);
+        }
+
+        status.innerText =
+            `${data.count} host(s) discovered in ${data.network}`;
+
+        select.innerHTML = "";
+
+        data.hosts.forEach(host => {
+
+            const option = document.createElement("option");
+
+            option.value = host.ip;
+
+            option.textContent =
+                `${host.hostname || "Unknown host"} — ${host.ip}`;
+
+            select.appendChild(option);
+
+            const hostDiv = document.createElement("div");
+
+            hostDiv.className = "host-entry";
+
+            hostDiv.innerHTML = `
+                <strong>${host.hostname || "Unknown host"}</strong>
+                <span>${host.ip}</span>
+                <span>${host.status.toUpperCase()}</span>
+            `;
+
+            hostList.appendChild(hostDiv);
+        });
+
+        if (data.hosts.length > 0) {
+            controls.style.display = "block";
+        }
+
+        document.getElementById("stage1").innerText =
+            `${data.count} host(s) discovered`;
+
+        addLog(
+            `[RECON] Nmap host discovery completed — ${data.count} host(s) found`
+        );
+
+    } catch (error) {
+
+        status.innerText = "Reconnaissance failed.";
+
+        addLog(
+            `[RECON] Error: ${error.message}`
+        );
+    }
+}
+
+
+async function scanSelectedHost() {
+
+    const select = document.getElementById("hostSelect");
+    const ip = select.value;
+    const results = document.getElementById("serviceResults");
+
+    if (!ip) {
+        return;
+    }
+
+    results.innerHTML = "Scanning selected host with Nmap...";
+
+    try {
+
+        const response = await fetch(
+            `/api/recon/scan?ip=${encodeURIComponent(ip)}`
+        );
+
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error(data.error);
+        }
+
+        const result = data.result;
+
+        if (result.count === 0) {
+
+            results.innerHTML = `
+                <h4>Service Scan Results</h4>
+                <p>No open TCP ports detected.</p>
+            `;
+
+        } else {
+
+            let html = `
+                <h4>Service Scan Results</h4>
+
+                <table class="recon-table">
+
+                    <tr>
+                      <th>Port</th>
+<th>Protocol</th>
+<th>Service</th>
+<th>Product</th>
+<th>Version</th>
+<th>Assessment</th>
+                    </tr>
+            `;
+
+           result.ports.forEach(port => {
+
+    html += `
+        <tr>
+            <td>${port.port}</td>
+            <td>${port.protocol}</td>
+            <td>${port.service || "-"}</td>
+            <td>${port.product || "-"}</td>
+            <td>${port.version || "-"}</td>
+
+            <td>
+                <button
+                    class="btn recon assess-btn"
+                    onclick='assessSelectedService(
+                        "${result.ip}",
+                        ${port.port},
+                        ${JSON.stringify(port.service || "")}
+                    )'>
+                    Assess
+                </button>
+            </td>
+        </tr>
+    `;
+});
+
+            html += "</table>";
+
+            results.innerHTML = html;
+        }
+
+        document.getElementById("stage1").innerText =
+            `Host ${ip} scanned`;
+
+        addLog(
+            `[RECON] Service scan completed for ${ip} — ${result.count} open port(s)`
+        );
+
+    } catch (error) {
+
+        results.innerHTML =
+            `<p>Scan failed: ${error.message}</p>`;
+
+        addLog(
+            `[RECON] Error: ${error.message}`
+        );
+    }
+}
+async function assessSelectedService(ip, port, service) {
+    window.selectedAttackTarget = {
+        ip: ip,
+        port: port,
+        service: service
+    };
+
+    const results = document.getElementById("serviceResults");
+
+    const box = document.createElement("div");
+
+    box.className = "assessment-box";
+
+    box.innerHTML = `
+        <h4>Initial Assessment</h4>
+        <p>
+            Assessing ${service || "TCP service"}
+            on port ${port}...
+        </p>
+    `;
+
+    results.appendChild(box);
+
+    try {
+
+        const response = await fetch(
+            `/api/recon/assess?ip=${encodeURIComponent(ip)}&port=${port}&service=${encodeURIComponent(service)}`
+        );
+
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error(data.error);
+        }
+
+        const assessment = data.result;
+
+        let details = "";
+
+        assessment.details.forEach(detail => {
+
+            details += `<li>${detail}</li>`;
+
+        });
+
+        box.innerHTML = `
+            <h4>Initial Assessment</h4>
+
+            <div class="assessment-grid">
+
+                <div>
+                    <strong>Target</strong>
+                    <span>${assessment.ip}</span>
+                </div>
+
+                <div>
+                    <strong>Port</strong>
+                    <span>${assessment.port}</span>
+                </div>
+
+                <div>
+                    <strong>Service</strong>
+                    <span>${assessment.service || "Unknown"}</span>
+                </div>
+
+                <div>
+                    <strong>TCP Reachable</strong>
+                    <span>
+                        ${assessment.reachable ? "YES" : "NO"}
+                    </span>
+                </div>
+
+            </div>
+
+            <ul class="assessment-details">
+                ${details}
+            </ul>
+        `;
+        const attackButton = document.createElement("button");
+
+        attackButton.className = "btn attack";
+        attackButton.textContent = "Initiate Initial Access";
+
+        attackButton.onclick = () => {
+            initiateInitialAccess(
+                window.selectedAttackTarget.ip,
+                window.selectedAttackTarget.port,
+                window.selectedAttackTarget.service
+            );
+        };
+
+        box.appendChild(attackButton);
+
+        document.getElementById("stage1").innerText =
+            `Initial assessment completed for ${ip}:${port}`;
+
+        addLog(
+            `[ASSESSMENT] ${service || "TCP"} on ${ip}:${port} — assessment completed`
+        );
+
+    } catch (error) {
+
+        box.innerHTML = `
+            <h4>Assessment Failed</h4>
+            <p>${error.message}</p>
+        `;
+
+        addLog(
+            `[ASSESSMENT] Error: ${error.message}`
+        );
+    }
+}
+async function initiateInitialAccess(ip, port, service) {
+    if ((service || "").toLowerCase() === "ssh") {
+        openDictionaryAttackDialog(ip, port, service);
+        return;
+    }
+
+    addLog(`[ATTACK] Initiating controlled initial access against ${service || "TCP"} on ${ip}:${port}`);
+
+    try {
+        const response = await fetch(
+            `/api/attack?ip=${encodeURIComponent(ip)}&port=${encodeURIComponent(port)}&service=${encodeURIComponent(service)}`
+        );
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || "Initial access failed");
+        }
+
+        const result = data.result;
+        let verification = "";
+
+        if (result.verification) {
+            verification = result.verification;
+        } else if (result.http_status) {
+            verification = `HTTP ${result.http_status} — ${result.server || "Server response received"}`;
+        }
+
+        document.getElementById("stage1").innerText =
+            `Initial access confirmed via ${service || "TCP"} on ${ip}:${port}`;
+        addLog(`[ATTACK] ${service || "TCP"} on ${ip}:${port} — access confirmed`);
+
+        if (verification) addLog(`[ATTACK] Verification: ${verification}`);
+    } catch (error) {
+        addLog(`[ATTACK] Error: ${error.message}`);
+        console.error("[ATTACK] Initial access failed:", error);
+    }
+}
+
+function openDictionaryAttackDialog(ip, port, service) {
+    const old = document.getElementById("ssh-dictionary-dialog");
+    if (old) old.remove();
+
+    const overlay = document.createElement("div");
+    overlay.id = "ssh-dictionary-dialog";
+    overlay.style.cssText =
+        "position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.72);" +
+        "display:flex;align-items:center;justify-content:center;padding:20px;";
+
+    const panel = document.createElement("div");
+    panel.style.cssText =
+        "width:min(560px,100%);max-height:90vh;overflow:auto;" +
+        "background:var(--card-bg,#20252b);color:inherit;padding:24px;" +
+        "border-radius:12px;border:1px solid #777;";
+
+    panel.innerHTML = `
+      <h2 style="margin-top:0">SSH Dictionary Attack Demo</h2>
+      <p>Lab target: <strong id="demo-target"></strong></p>
+      <p>Choose a TXT file with up to 500 entries, or run the built-in demo.</p>
+      <p style="font-size:.9em;opacity:.8">
+        This workflow simulates dictionary attempts. It does not test passwords
+        against SSH or establish a real SSH session.
+      </p>
+      <input id="demo-file" type="file" accept=".txt,text/plain"
+             style="display:block;width:100%;margin:16px 0">
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button id="demo-run-file" type="button">Run selected TXT demo</button>
+        <button id="demo-run-built-in" type="button">Run built-in demo</button>
+        <button id="demo-cancel" type="button">Cancel</button>
+      </div>
+      <p id="demo-status" role="status"></p>
+      <ol id="demo-results" style="max-height:220px;overflow:auto"></ol>
+    `;
+
+    panel.querySelector("#demo-target").textContent = `${ip}:${port}`;
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+
+    const fileInput = panel.querySelector("#demo-file");
+    const status = panel.querySelector("#demo-status");
+    const results = panel.querySelector("#demo-results");
+    const fileButton = panel.querySelector("#demo-run-file");
+    const builtInButton = panel.querySelector("#demo-run-built-in");
+
+    panel.querySelector("#demo-cancel").onclick = () => overlay.remove();
+
+    async function runDemo(file) {
+        if (!file) {
+            status.textContent = "Choose a TXT file first.";
+            return;
+        }
+
+        fileButton.disabled = true;
+        builtInButton.disabled = true;
+        results.replaceChildren();
+        status.textContent = "Running simulated dictionary attempts...";
+
+        try {
+            const form = new FormData();
+            form.append("dictionary", file);
+
+            const response = await fetch("/api/dictionary-demo", {
+                method: "POST",
+                body: form
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || "Demo failed.");
+            }
+
+            for (const item of (data.attempts || [])) {
+                const li = document.createElement("li");
+                li.textContent =
+                    `Attempt ${item.attempt}: ${item.status}`;
+                results.appendChild(li);
+            }
+
+            status.textContent = data.message;
+
+            if (typeof addLog === "function") {
+                addLog(`[DEMO] ${data.message}`);
+            }
+
+            if (!data.matched) {
+                status.textContent +=
+                    " Try a file containing at least 15 non-empty entries.";
+                return;
+            }
+
+            // Update the visible timeline only. Do not invoke real attack,
+            // encryption, locking, or SSH authentication functions.
+            const stages = [
+                ["stage1", "Simulated SSH access granted — DEMO"],
+                ["stage2", "Victim connection simulated — DEMO"],
+                ["stage3", "Attack progression simulated — DEMO"],
+                ["stage4", "Encryption stage not executed by demo"],
+                ["stage5", "Victim lock stage not executed by demo"],
+                ["stage6", "Recovery controls remain available"]
+            ];
+
+            for (const [id, message] of stages) {
+                const node = document.getElementById(id);
+                if (node) node.textContent = message;
+            }
+
+            if (typeof addLog === "function") {
+                addLog("[DEMO] Simulated access transition completed.");
+                addLog("[DEMO] Existing encryption and recovery controls were not invoked.");
+            }
+
+            status.textContent =
+                "SIMULATED ACCESS GRANTED. Closing this demo dialog...";
+
+            window.setTimeout(() => overlay.remove(), 1800);
+
+        } catch (error) {
+            status.textContent = error.message;
+            if (typeof addLog === "function") {
+                addLog(`[DEMO] Error: ${error.message}`);
+            }
+        } finally {
+            fileButton.disabled = false;
+            builtInButton.disabled = false;
+        }
+    }
+
+    fileButton.onclick = () => runDemo(fileInput.files[0]);
+
+    builtInButton.onclick = () => {
+        const entries = Array.from(
+            {length: 500},
+            (_, i) => `DEMO_CANDIDATE_${String(i + 1).padStart(3, "0")}`
+        );
+        const demoFile = new File(
+            [entries.join("\n") + "\n"],
+            "demo_dictionary.txt",
+            {type: "text/plain"}
+        );
+        runDemo(demoFile);
+    };
+}
+
+/* RECONNAISSANCE */
+
+async function runRecon() {
+
+    await addLog("[RECON] Starting reconnaissance...");
+
+    try {
+
+        const response = await fetch("/api/recon");
+
+        if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+
+            await addLog(
+                "[RECON] Target: " + data.victim
+            );
+
+            await addLog(
+                "[RECON] Status: " + data.status
+            );
+
+            data.networks.forEach(function(network) {
+
+                addLog(
+                    "[RECON] Network: " + network.network
+                );
+
+                addLog(
+                    "[RECON] IP: " + network.ip
+                );
+
+                addLog(
+                    "[RECON] Gateway: " + network.gateway
+                );
+
+            });
+
+            document.getElementById("stage1").textContent =
+                "Target identified";
+
+        } else {
+
+            await addLog(
+                "[RECON ERROR] " + data.error
+            );
+
+        }
+
+    } catch (error) {
+
+        await addLog(
+            "[RECON ERROR] " + error.message
+        );
+
+    }
+}
+
+
+/* CONTROLLED ATTACK SIMULATION */
+
+async function initiateAttack() {
+
+    await addLog(
+        "[ATTACK] Controlled attack simulation initiated."
+    );
+
+    await addLog(
+        "[ATTACK] Target: locker-victim"
+    );
+
+    await addLog(
+        "[ATTACK] Environment confirmed isolated."
+    );
+
+    document.getElementById("stage3").textContent =
+        "Simulation initiated";
+}
+
+
+/* ENCRYPTION PLACEHOLDER */
+async function encryptFiles() {
+
+    await addLog("[ENCRYPTION] Starting file encryption...");
+
+    try {
+
+        const response = await fetch("/api/encrypt");
+
+        if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+
+            await addLog(
+                "[ENCRYPTION] Encryption completed successfully."
+            );
+
+            await addLog(
+                "[ENCRYPTION] Files encrypted: " + data.count
+            );
+
+            data.files.forEach(function(file) {
+
+                addLog(
+                    "[ENCRYPTION] Locked: " + file
+                );
+
+            });
+
+            document.getElementById("stage4").textContent =
+                data.count + " files encrypted";
+
+        } else {
+
+            await addLog(
+                "[ENCRYPTION ERROR] " + data.error
+            );
+
+        }
+
+    } catch (error) {
+
+        await addLog(
+            "[ENCRYPTION ERROR] " + error.message
+        );
+
+    }
+}
+
+
+/* VICTIM LOCK PLACEHOLDER */
+
+async function lockVictim() {
+
+    await addLog("[LOCK] Activating victim lock...");
+
+    try {
+
+        const response = await fetch("/api/lock");
+
+        if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+
+            await addLog(
+                "[LOCK] Victim lock activated."
+            );
+
+            await addLog(
+                "[LOCK] Controlled lab lock screen created."
+            );
+
+            document.getElementById("stage5").textContent =
+                "Victim locked";
+
+        } else {
+
+            await addLog(
+                "[LOCK ERROR] " + data.error
+            );
+
+        }
+
+    } catch (error) {
+
+        await addLog(
+            "[LOCK ERROR] " + error.message
+        );
+
+    }
+}
+
+
+/* RECOVERY PLACEHOLDER */
+
+async function recoverFiles() {
+
+    await addLog("[RECOVERY] Starting recovery process...");
+
+    try {
+
+        const response = await fetch("/api/recover");
+
+        if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+
+            await addLog(
+                "[RECOVERY] Recovery completed successfully."
+            );
+await addLog(
+    "[RECOVERY] Victim lock removed."
+);
+
+            await addLog(
+                "[RECOVERY] Files restored: " + data.count
+            );
+
+            data.files.forEach(function(file) {
+
+                addLog(
+                    "[RECOVERY] Restored: " + file
+                );
+
+            });
+
+            document.getElementById("stage6").textContent =
+                data.count + " files recovered";
+
+        } else {
+
+            await addLog(
+                "[RECOVERY ERROR] " + data.error
+            );
+
+        }
+
+    } catch (error) {
+
+        await addLog(
+            "[RECOVERY ERROR] " + error.message
+        );
+
+    }
+}
+
+</script>
+
+
+
+</body>
+</html>

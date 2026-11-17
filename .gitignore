@@ -1,0 +1,37 @@
+# Python environments
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Secrets and recovery material
+.env
+.env.*
+!.env.example
+recovery_key.json
+*.pem
+*.key
+id_rsa
+id_ed25519
+
+# Runtime output
+*.log
+logs/
+*.locked
+
+# Generated files
+.DS_Store
+Thumbs.db
+.coverage
+htmlcov/
+
+# Local development backups
+*.backup
+*.recon-backup
+*.bak*
+backups/
